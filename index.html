@@ -20,22 +20,26 @@
   --pad:24px;
 
   /* layout knobs (URL overrides supported) */
-  --headerTop:24px;   /* move header down to clear your marquee: &headerTop=100 */
-  --headerH:80px;     /* auto-updated by JS to real header height */
-  --chatW:900px;      /* &chatW=960 */
+  --headerTop:24px;     /* &headerTop=100 to clear marquee */
+  --headerH:80px;       /* auto-updated by JS to real header height */
+  --chatW:900px;        /* &chatW=960 */
 
-  /* sizes */
-  --viewerH:120px;    /* &viewerH=140 */
-  --viewerW:760px;    /* &viewerW=820 */
-  --tickerH:64px;     /* &tickerH=72 */
-  --throneH:150px;    /* &throneH=190 */
+  /* RIGHT RAIL sizes (bigger so viewer won’t vanish) */
+  --viewerH:140px;      /* &viewerH=… */
+  --viewerW:860px;      /* &viewerW=… */
+  --tickerH:72px;       /* &tickerH=… */
 
-  /* Spotify “next to camera” dock (absolute position) */
-  --spotifyW:520px;   /* &spotifyW=600 */
-  --spotifyH:96px;    /* &spotifyH=110 */
-  --spotifyX:24px;    /* &spotifyX=40  (px from left) */
-  --spotifyY:calc(100vh - var(--pad) - var(--spotifyH) - 170px - 12px); /* just above footer */
-  /* right stack height = viewer + ticker + gap */
+  /* THRONE */
+  --throneH:180px;      /* &throneH=… */
+
+  /* Spotify “next to camera” dock (bigger + offset from bottom-left cam) */
+  --spotifyW:900px;     /* &spotifyW=… */
+  --spotifyH:130px;     /* &spotifyH=… */
+  --spotifyX:560px;     /* &spotifyX=… (to the right of a bottom-left cam) */
+  /* place above footer and above a ~320–360px tall cam block */
+  --spotifyY:calc(100vh - var(--pad) - var(--spotifyH) - 340px);
+
+  /* right stack height = viewer + ticker + gap (for chat offset) */
   --stackH: calc(var(--viewerH) + var(--tickerH) + 16px);
 }
 
@@ -43,7 +47,7 @@
 html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
 .overlay{position:relative;height:100vh;width:100vw}
 
-/* header */
+/* header (keep; make transparent later if you want) */
 .header{
   position:absolute;left:var(--pad);right:var(--pad);top:var(--headerTop);
   background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;outline:3px solid var(--ink);
@@ -62,7 +66,8 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
   position:absolute;right:var(--pad);
   top:calc(var(--headerTop) + var(--headerH));
   width:var(--chatW);
-  z-index:24; display:grid; gap:16px;
+  z-index:40; /* ↑ ensure viewer+ticker sit above chat and anything else */
+  display:grid; gap:16px;
   grid-template-rows: var(--viewerH) var(--tickerH);
 }
 .rightstack .viewer{height:var(--viewerH); width:100%}
@@ -92,7 +97,7 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
   height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:20
 }
 
-/* SPOTIFY dock – place it next to your camera with X/Y */
+/* SPOTIFY dock – placed beside cam; adjust with URL vars if needed */
 .spotifyDock{
   position:absolute;left:var(--spotifyX);top:var(--spotifyY);
   width:var(--spotifyW);height:var(--spotifyH);z-index:26
@@ -107,6 +112,10 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 .sub{font:700 48px system-ui;text-align:center;text-shadow:0 3px 8px rgba(0,0,0,.9)}
 .cd{font:1000 92px system-ui;text-align:center;margin-top:8px}
 .hidden{display:none}
+
+/* (optional) uncomment to remove header opacity completely
+.header{ background:transparent !important; outline:none !important; box-shadow:none !important; padding:0 !important }
+*/
 </style>
 </head>
 <body>
