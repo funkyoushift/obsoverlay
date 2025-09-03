@@ -18,13 +18,17 @@
   --ink:#070707;
   --panel:rgba(6,6,6,.78);
   --pad:24px;
-  --chatW:900px;    /* override via ?chatW=960 */
-  --spotifyH:64px;  /* override via ?spotifyH=48 */
 
-  /* size vars (override via URL: &viewerH=110&viewerW=720&throneH=140) */
-  --viewerH:96px;
-  --viewerW:640px;
-  --throneH:120px;
+  /* layout knobs (URL overrides supported) */
+  --headerTop:24px;   /* move header down to clear your marquee (e.g. &headerTop=100) */
+  --headerH:80px;     /* approx header height for stacking math */
+  --chatW:900px;      /* &chatW=960 */
+  --spotifyH:64px;    /* &spotifyH=48 */
+
+  /* sizes (you asked for a bigger viewer + taller throne) */
+  --viewerH:120px;    /* &viewerH=140 */
+  --viewerW:760px;    /* &viewerW=820 */
+  --throneH:150px;    /* &throneH=170 */
 }
 
 *{box-sizing:border-box}
@@ -33,7 +37,7 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 
 /* header */
 .header{
-  position:absolute;left:var(--pad);right:var(--pad);top:var(--pad);
+  position:absolute;left:var(--pad);right:var(--pad);top:var(--headerTop);
   background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;outline:3px solid var(--ink);
   display:flex;gap:16px;align-items:center;z-index:30
 }
@@ -47,12 +51,16 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
 /* layout (4K) */
-.spotify{position:absolute;left:var(--pad);right:var(--pad);top:118px;height:var(--spotifyH);z-index:20}
-.throne {
+.spotify{position:absolute;left:var(--pad);right:var(--pad);top:calc(var(--headerTop) + var(--headerH));height:var(--spotifyH);z-index:20}
+.throne{
   position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad));
-  top:calc(118px + var(--spotifyH) + 8px);height:var(--throneH);z-index:20
+  top:calc(var(--headerTop) + var(--headerH) + var(--spotifyH) + 8px);
+  height:var(--throneH);z-index:20
 }
-.sidebar{position:absolute;right:var(--pad);top:118px;bottom:200px;width:var(--chatW);z-index:20}
+/* let Throne content extend if it needs to (no cropping) */
+.throne.panel.card{overflow:visible}
+
+.sidebar{position:absolute;right:var(--pad);top:calc(var(--headerTop) + var(--headerH));bottom:200px;width:var(--chatW);z-index:20}
 .footer{
   position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad));bottom:var(--pad);
   height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:20
@@ -65,7 +73,6 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 .title{font:1000 180px/1 system-ui;text-transform:uppercase;text-align:center;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
 .sub{font:700 48px system-ui;text-align:center;text-shadow:0 3px 8px rgba(0,0,0,.9)}
 .cd{font:1000 92px system-ui;text-align:center;margin-top:8px}
-
 .hidden{display:none}
 </style>
 </head>
@@ -142,10 +149,10 @@ const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
 const scene = (q.get("scene") || "main").toLowerCase();
 
-/* apply brand + size vars */
+/* apply brand + size vars (chatW, viewerH/W, throneH, spotifyH, headerTop) */
 document.getElementById("brand").textContent = get("brand");
 const setVar = (k,v) => v && document.documentElement.style.setProperty(k, v.endsWith('px')? v : v+'px');
-['chatW','viewerH','viewerW','throneH','spotifyH'].forEach(v => setVar('--'+v, q.get(v) || ''));
+['chatW','viewerH','viewerW','throneH','spotifyH','headerTop'].forEach(v => setVar('--'+v, q.get(v) || ''));
 
 /* set embeds (hide panel if missing) */
 function setSrc(id, url){
