@@ -9,7 +9,7 @@
   --ink:#070707;
   --panel:rgba(6,6,6,.78);
   --pad:24px;
-  --chatW:900px; /* change via ?chatW=960 */
+  --chatW:900px;         /* change via ?chatW=960 */
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:transparent;color:#fff;
@@ -22,7 +22,7 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;
   outline:3px solid var(--ink);display:flex;gap:16px;align-items:center;z-index:30}
 .brand{font-weight:1000;font-size:44px;white-space:nowrap}
 .header-right{margin-left:auto;display:flex;gap:14px;align-items:center}
-.header-right .viewer{height:56px;width:min(520px,32vw)}
+.header-right .viewer{height:64px;width:min(560px,34vw)} /* viewer widget box */
 
 /* PANELS */
 .panel{background:var(--panel);backdrop-filter:blur(6px);
@@ -31,7 +31,7 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;
 .card{position:relative;overflow:hidden}
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
-/* LAYOUT (3840×2160-friendly) */
+/* LAYOUT (4K friendly) */
 .spotify{position:absolute;left:var(--pad);right:var(--pad);top:118px;height:64px;z-index:20}
 .throne {position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad)); top:186px;height:84px;z-index:20}
 .sidebar{position:absolute;right:var(--pad);top:118px;bottom:200px;width:var(--chatW);z-index:20}
@@ -58,18 +58,49 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;
     <div id="brand" class="brand">FUNKYOUSHIFT</div>
     <div class="header-right">
       <div class="viewer panel card">
-        <iframe id="viewer" title="Viewer Count" allowtransparency="true"></iframe>
+        <iframe id="viewer" title="Viewer Count"
+          referrerpolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+        </iframe>
       </div>
     </div>
   </div>
 
   <!-- ROWS / COLUMNS -->
-  <div class="spotify panel card"><iframe id="spotify" title="Now Playing" allowtransparency="true"></iframe></div>
-  <div class="throne  panel card"><iframe id="throne"  title="Throne"       allowtransparency="true"></iframe></div>
-  <div class="sidebar panel card"><iframe id="chat"    title="Chat"         allowtransparency="true"></iframe></div>
+  <div class="spotify panel card">
+    <iframe id="spotify" title="Now Playing"
+      referrerpolicy="no-referrer"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+    </iframe>
+  </div>
+
+  <div class="throne panel card">
+    <iframe id="throne" title="Throne"
+      referrerpolicy="no-referrer"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+    </iframe>
+  </div>
+
+  <div class="sidebar panel card">
+    <iframe id="chat" title="Chat"
+      referrerpolicy="no-referrer"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+    </iframe>
+  </div>
+
   <div class="footer">
-    <div class="panel card"><iframe id="sub" title="Sub Goal"     allowtransparency="true"></iframe></div>
-    <div class="panel card"><iframe id="fol" title="Follower Goal" allowtransparency="true"></iframe></div>
+    <div class="panel card">
+      <iframe id="sub" title="Sub Goal"
+        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+      </iframe>
+    </div>
+    <div class="panel card">
+      <iframe id="fol" title="Follower Goal"
+        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms">
+      </iframe>
+    </div>
   </div>
 
   <!-- SCENE LAYER -->
@@ -95,10 +126,10 @@ const DEFAULTS = {
 };
 
 /* ===== OPTIONAL URL PARAMS =====
-   ?scene=starting|brb|main (default main)
-   ?cd=600                 (countdown seconds for starting)
+   ?scene=starting|brb|main      (default main)
+   ?cd=600                       (countdown seconds for starting)
    ?brand=TEXT
-   ?chatW=960              (chat sidebar width in px)
+   ?chatW=960                    (chat sidebar width in px)
    (You can also override any widget: &chatUrl=..., &subUrl=..., etc.)
 ================================== */
 
@@ -106,9 +137,7 @@ const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
 const scene = (q.get("scene") || "main").toLowerCase();
 
-const brand = get("brand");
-document.getElementById("brand").textContent = brand;
-
+document.getElementById("brand").textContent = get("brand");
 const chatW = q.get("chatW");
 if (chatW) {
   document.documentElement.style.setProperty("--chatW", chatW.endsWith("px") ? chatW : chatW + "px");
