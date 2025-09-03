@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>FunkYouSHiFT Overlay</title>
 
-<!-- perf hints -->
 <link rel="preconnect" href="https://streamlabs.com" crossorigin>
 <link rel="dns-prefetch" href="https://streamlabs.com">
 <link rel="preconnect" href="https://throne.com" crossorigin>
@@ -15,31 +14,29 @@
 
 <style>
 :root{
-  --ink:#070707;
-  --panel:rgba(6,6,6,.78);
-  --pad:24px;
+  --ink:#070707; --panel:rgba(6,6,6,.78); --pad:24px;
 
-  /* layout knobs (URL overrides supported) */
-  --headerTop:24px;     /* &headerTop=100 to clear marquee */
-  --headerH:80px;       /* auto-updated by JS to real header height */
-  --chatW:900px;        /* &chatW=960 */
+  /* layout knobs */
+  --headerTop:24px;    /* &headerTop=100 */
+  --headerH:80px;      /* auto-measured by JS */
+  --chatW:900px;       /* &chatW=960 */
 
-  /* RIGHT RAIL sizes (bigger so viewer won’t vanish) */
-  --viewerH:140px;      /* &viewerH=… */
-  --viewerW:860px;      /* &viewerW=… */
-  --tickerH:72px;       /* &tickerH=… */
+  /* RIGHT RAIL sizes */
+  --viewerH:140px;     /* &viewerH=… */
+  --viewerW:860px;     /* &viewerW=… */
+  --viewerScale:1.10;  /* NEW: &viewerScale=1.2 (scales inside the iframe box) */
+  --tickerH:72px;      /* &tickerH=… */
 
   /* THRONE */
-  --throneH:180px;      /* &throneH=… */
+  --throneH:180px;     /* &throneH=… */
 
-  /* Spotify “next to camera” dock (bigger + offset from bottom-left cam) */
-  --spotifyW:900px;     /* &spotifyW=… */
-  --spotifyH:130px;     /* &spotifyH=… */
-  --spotifyX:560px;     /* &spotifyX=… (to the right of a bottom-left cam) */
-  /* place above footer and above a ~320–360px tall cam block */
-  --spotifyY:calc(100vh - var(--pad) - var(--spotifyH) - 340px);
+  /* SPOTIFY dock (transparent) */
+  --spotifyW:900px;    /* &spotifyW=… */
+  --spotifyH:130px;    /* &spotifyH=… */
+  --spotifyX:560px;    /* &spotifyX=… */
+  --spotifyY:calc(100vh - var(--pad) - var(--spotifyH) - 340px); /* above a bottom-left cam */
 
-  /* right stack height = viewer + ticker + gap (for chat offset) */
+  /* chat offset = viewer + ticker + gap */
   --stackH: calc(var(--viewerH) + var(--tickerH) + 16px);
 }
 
@@ -47,7 +44,7 @@
 html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
 .overlay{position:relative;height:100vh;width:100vw}
 
-/* header (keep; make transparent later if you want) */
+/* header */
 .header{
   position:absolute;left:var(--pad);right:var(--pad);top:var(--headerTop);
   background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;outline:3px solid var(--ink);
@@ -61,19 +58,25 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 .card{position:relative;overflow:hidden}
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
-/* RIGHT SIDEBAR STACK (viewer on top, ticker below it) */
+/* RIGHT SIDEBAR (viewer on top, ticker below) */
 .rightstack{
   position:absolute;right:var(--pad);
   top:calc(var(--headerTop) + var(--headerH));
   width:var(--chatW);
-  z-index:40; /* ↑ ensure viewer+ticker sit above chat and anything else */
-  display:grid; gap:16px;
+  z-index:40; display:grid; gap:16px;
   grid-template-rows: var(--viewerH) var(--tickerH);
 }
 .rightstack .viewer{height:var(--viewerH); width:100%}
+.rightstack .viewer > iframe{
+  /* scale the widget content up without changing the grid */
+  transform: scale(var(--viewerScale));
+  transform-origin: top left;
+  width: calc(100% / var(--viewerScale));
+  height: calc(100% / var(--viewerScale));
+}
 .rightstack .ticker{height:var(--tickerH); width:100%}
 
-/* chat starts below viewer+ticker stack */
+/* chat starts below viewer+ticker */
 .sidebar{
   position:absolute;right:var(--pad);
   top:calc(var(--headerTop) + var(--headerH) + var(--stackH) + 8px);
@@ -97,12 +100,13 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
   height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:20
 }
 
-/* SPOTIFY dock – placed beside cam; adjust with URL vars if needed */
+/* SPOTIFY dock – TRANSPARENT container (no panel background) */
 .spotifyDock{
   position:absolute;left:var(--spotifyX);top:var(--spotifyY);
-  width:var(--spotifyW);height:var(--spotifyH);z-index:26
+  width:var(--spotifyW);height:var(--spotifyH);
+  z-index:26; background:transparent !important;
 }
-.spotifyDock.panel.card{overflow:visible}
+.spotifyDock.card{outline:none !important;box-shadow:none !important;overflow:visible}
 
 /* scene layer */
 .scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:25}
@@ -113,7 +117,7 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 .cd{font:1000 92px system-ui;text-align:center;margin-top:8px}
 .hidden{display:none}
 
-/* (optional) uncomment to remove header opacity completely
+/* (optional) make header fully transparent)
 .header{ background:transparent !important; outline:none !important; box-shadow:none !important; padding:0 !important }
 */
 </style>
@@ -167,8 +171,8 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
     </div>
   </div>
 
-  <!-- SPOTIFY dock (place near your camera) -->
-  <div class="spotifyDock panel card" aria-label="Now Playing">
+  <!-- SPOTIFY dock (transparent, no panel background) -->
+  <div class="spotifyDock card" aria-label="Now Playing">
     <iframe id="spotify" title="Now Playing" aria-label="Now Playing" loading="eager"
       referrerpolicy="no-referrer"
       sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
@@ -185,7 +189,7 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 </div>
 
 <script>
-/* widget defaults */
+/* widget defaults (we already have your viewer link—no need to resend) */
 const DEFAULTS = {
   subUrl:      "https://streamlabs.com/widgets/sub-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   followerUrl: "https://streamlabs.com/widgets/follower-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
@@ -197,61 +201,57 @@ const DEFAULTS = {
   brand:       "FUNKYOUSHIFT"
 };
 
-/* URL params -> CSS vars */
 const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
 const scene = (q.get("scene") || "main").toLowerCase();
 document.getElementById("brand").textContent = get("brand");
 
-const setVar = (k,v) => v && document.documentElement.style.setProperty(k, v.match(/px$|%$|vh$|vw$/)? v : v+'px');
-['chatW','viewerH','viewerW','tickerH','throneH','spotifyW','spotifyH','spotifyX','spotifyY','headerTop'].forEach(v => setVar('--'+v, q.get(v) || ''));
+/* url -> css vars (supports px/%/vh/vw) */
+const setVar = (k,v) => v && document.documentElement.style.setProperty(k, /px$|%$|vh$|vw$/.test(v)? v : v+'px');
+['chatW','viewerH','viewerW','viewerScale','tickerH','throneH','spotifyW','spotifyH','spotifyX','spotifyY','headerTop'].forEach(v => setVar('--'+v, q.get(v) || ''));
 
 /* measure real header height so stacking is correct */
-const resizeHeaderH = () => {
+const measureHeader = () => {
   const el = document.querySelector('.header');
   if (!el) return;
   const h = Math.ceil(el.getBoundingClientRect().height);
   document.documentElement.style.setProperty('--headerH', h + 'px');
 };
-resizeHeaderH(); addEventListener('resize', resizeHeaderH);
+measureHeader(); addEventListener('resize', measureHeader);
+
+/* cache-buster so OBS doesn’t keep an old blank iframe */
+const withBust = (url) => {
+  try { const u = new URL(url); u.searchParams.set('_v', Date.now()); return u.toString(); }
+  catch { return url; }
+};
 
 /* set embeds (hide panel if missing) */
 function setSrc(id, url){
   const el = document.getElementById(id);
   if(!el){ return; }
   if(!url){ el.closest('.card')?.classList.add('hidden'); el.src = 'about:blank'; return; }
-  el.src = url;
+  el.src = withBust(url);
 }
 setSrc('chat',    get('chatUrl'));
 setSrc('sub',     get('subUrl'));
 setSrc('fol',     get('followerUrl'));
-setSrc('viewer',  get('viewerUrl'));
+setSrc('viewer',  get('viewerUrl'));   // viewer above ticker
+setSrc('don',     get('donationUrl'));
 setSrc('throne',  get('throneUrl'));
 setSrc('spotify', get('spotifyUrl'));
-setSrc('don',     get('donationUrl'));
 
 /* scene layer */
-const layer = document.getElementById('layer'),
-      title = document.getElementById('t'),
-      sub   = document.getElementById('s'),
-      cd    = document.getElementById('c');
-
+const layer = document.getElementById('layer'), title = document.getElementById('t'),
+      sub = document.getElementById('s'), cd = document.getElementById('c');
 function showLayer(on){ layer.toggleAttribute('open', !!on); layer.setAttribute('aria-hidden', on? 'false':'true'); }
-
 if(scene==='starting'){
-  showLayer(true);
-  title.textContent = 'STARTING SOON';
-  sub.textContent   = 'Grab a snack. We go live in…';
+  showLayer(true); title.textContent='STARTING SOON'; sub.textContent='Grab a snack. We go live in…';
   const cdStr = q.get('cd');
   if(cdStr){
     cd.classList.remove('hidden');
     let t = Math.max(0, parseInt(cdStr,10) || 0);
     const fmt = n => String(n).padStart(2,'0');
-    (function tick(){
-      const m = Math.floor(t/60), s = t%60;
-      cd.textContent = `${fmt(m)}:${fmt(s)}`;
-      if(t>0){ t--; setTimeout(tick, 1000); }
-    })();
+    (function tick(){ const m=Math.floor(t/60), s=t%60; cd.textContent=`${fmt(m)}:${fmt(s)}`; if(t>0){t--; setTimeout(tick,1000);} })();
   }
 }
 </script>
