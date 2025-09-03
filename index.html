@@ -1,34 +1,110 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FunkYouSHiFT Overlay v8</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FunkYouSHiFT Overlay</title>
 <style>
 :root{--ink:#070707;--panel:rgba(6,6,6,.78);--glass:rgba(20,20,20,.35)}
+*{box-sizing:border-box}
 html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
-.header{position:fixed;left:20px;right:20px;top:20px;background:rgba(0,0,0,.65);padding:10px 16px;border-radius:18px;outline:3px solid var(--ink);display:flex;gap:16px;align-items:center}
-.brand{font-weight:1000;font-size:44px} .vp{margin-left:auto;display:flex;gap:12px}.vp .count{font-weight:1000;font-size:64px}
+.overlay{position:relative;height:100vh;width:100vw}
+.header{position:absolute;left:24px;right:24px;top:24px;background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;outline:3px solid var(--ink);display:flex;gap:16px;align-items:center;z-index:20}
+.brand{font-weight:1000;font-size:44px}
+.vp{margin-left:auto;display:flex;gap:16px;align-items:center}
+.vp .lab{opacity:.9;font-weight:800}
+.vp .num{font-weight:1000;font-size:64px}
 .panel{background:var(--panel);backdrop-filter:blur(6px);border-radius:20px;outline:3px solid var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.45)}
-.row{position:fixed;left:20px;right:900px;top:124px;height:84px}
-.sidebar{position:fixed;right:20px;top:124px;bottom:200px;width:860px;display:flex;flex-direction:column;gap:20px}
-.footer{position:fixed;left:20px;right:900px;bottom:20px;height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.ticker{position:fixed;left:20px;right:20px;bottom:200px;height:64px}
+/* layout (left: content; right: chat column) */
+.throne{position:absolute;left:24px;right:900px;top:120px;height:84px;z-index:10}
+.sidebar{position:absolute;right:24px;top:120px;bottom:200px;width:876px;z-index:10}
+.footer{position:absolute;left:24px;right:900px;bottom:24px;height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:10}
+.ticker{position:absolute;left:24px;right:24px;bottom:210px;height:64px;z-index:10}
+.card{position:relative;overflow:hidden}
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.scene{position:fixed;inset:0;display:none;place-items:center;pointer-events:none}
+/* scene overlays (e.g., starting soon) */
+.scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:15}
 .scene[open]{display:grid}
-.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85);text-align:center}
+.scene .box{padding:28px 40px;border-radius:22px;background:rgba(0,0,0,.28);outline:3px solid var(--ink)}
+.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-align:center;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
 .sub{font:700 48px system-ui;text-align:center;text-shadow:0 3px 8px rgba(0,0,0,.9)}
-.cd{font:1000 92px system-ui;text-align:center}
-</style></head>
+.cd{font:1000 92px system-ui;text-align:center;margin-top:8px}
+.hidden{display:none}
+</style>
+</head>
 <body>
-<div class="header panel"><div id="brand" class="brand">FUNKYOUSHIFT</div><div class="vp">Twitch <span id="tw" class="count">0</span> YouTube <span id="yt" class="count">0</span></div></div>
-<div class="row panel"><iframe id="th" title="Throne"></iframe></div>
-<div class="sidebar"><div class="panel card" style="flex:1;position:relative"><iframe id="chat" title="Chat"></iframe></div></div>
-<div class="footer"><div class="panel card" style="position:relative"><iframe id="sub" title="Sub Goal"></iframe></div><div class="panel card" style="position:relative"><iframe id="fol" title="Follower Goal"></iframe></div></div>
-<div class="ticker panel card" style="position:fixed"><iframe id="don" title="Donation Ticker"></iframe></div>
-<div id="layer" class="scene"><div><div id="t" class="title">Starting Soon</div><div id="s" class="sub">Grab a snack. We go live in…</div><div id="c" class="cd" hidden>10:00</div></div></div>
+<div class="overlay">
+  <div class="header panel">
+    <div id="brand" class="brand">FUNKYOUSHIFT</div>
+    <div class="vp">
+      <span class="lab">Twitch</span><span id="tw" class="num">0</span>
+      <span class="lab">YouTube</span><span id="yt" class="num">0</span>
+    </div>
+  </div>
+
+  <div class="throne panel card"><iframe id="th" title="Throne"></iframe></div>
+  <div class="sidebar panel card"><iframe id="chat" title="Chat"></iframe></div>
+  <div class="footer">
+    <div class="panel card"><iframe id="sub" title="Sub Goal"></iframe></div>
+    <div class="panel card"><iframe id="fol" title="Follower Goal"></iframe></div>
+  </div>
+  <div class="ticker panel card"><iframe id="don" title="Donation Ticker"></iframe></div>
+
+  <div id="layer" class="scene">
+    <div class="box">
+      <div id="t" class="title">STARTING SOON</div>
+      <div id="s" class="sub">Grab a snack. We go live in…</div>
+      <div id="c" class="cd hidden">10:00</div>
+    </div>
+  </div>
+</div>
+
 <script>
-const q=new URLSearchParams(location.search), scene=(q.get('scene')||'main').toLowerCase();
-const widgets=(q.get('widgets')??'1')!=='0'; document.getElementById('brand').textContent=q.get('brand')||'FUNKYOUSHIFT';
-function set(id,url){ if(url) document.getElementById(id).src=url; }
-if(widgets){ set('chat',q.get('chatUrl')); set('sub',q.get('subUrl')); set('fol',q.get('followerUrl')); set('don',q.get('donationUrl')); document.getElementById('th').src='https://throne.com/featured-item-overlay/twitch:492630829'; }
-else{ ['chat','sub','fol','don'].forEach(id=>{let p=document.getElementById(id).parentElement; p.style.display='none';}); document.querySelector('.row').style.display='none'; }
-if(scene==='starting'){ document.getElementById('layer').setAttribute('open',''); const cd=q.get('cd'); if(cd){ const C=document.getElementById('c'); C.hidden=false; let t=parseInt(cd,10)||0; const f=n=>String(n).padStart(2,'0'); (function tick(){const m=Math.floor(t/60),s=t%60; C.textContent=f(m)+':'+f(s); if(t>0){t--; setTimeout(tick,1000);} })(); } }
+/* --- defaults (your URLs) --- */
+const DEFAULTS = {
+  chatUrl: "https://streamlabs.com/widgets/chat-box/v1/7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  subUrl: "https://streamlabs.com/widgets/sub-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  followerUrl: "https://streamlabs.com/widgets/follower-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  donationUrl: "https://streamlabs.com/widgets/donation-ticker?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  throneUrl: "https://throne.com/featured-item-overlay/twitch:492630829",
+  brand: "FUNKYOUSHIFT"
+};
+/* --- params override defaults --- */
+const q = new URLSearchParams(location.search);
+const get = (k) => q.get(k) || DEFAULTS[k] || "";
+const widgets = (q.get("widgets") ?? "1") !== "0";
+const scene = (q.get("scene") || "main").toLowerCase();
+const brand = q.get("brand") || DEFAULTS.brand;
+document.getElementById("brand").textContent = brand;
+
+/* viewer counts if provided (optional) */
+const twQ = parseInt(q.get("tw")||"",10), ytQ = parseInt(q.get("ytv")||"",10);
+if(!isNaN(twQ)) document.getElementById("tw").textContent = twQ;
+if(!isNaN(ytQ)) document.getElementById("yt").textContent = ytQ;
+
+/* embeds */
+function setSrc(id, url){ if(!url){document.getElementById(id).closest(".card").style.display="none";return;} document.getElementById(id).src = url; }
+if(widgets){
+  setSrc("chat", get("chatUrl"));
+  setSrc("sub", get("subUrl"));
+  setSrc("fol", get("followerUrl"));
+  setSrc("don", get("donationUrl"));
+  setSrc("th",  get("throneUrl"));
+}else{
+  ["chat","sub","fol","don"].forEach(id=>document.getElementById(id).closest(".card").style.display="none");
+  document.querySelector(".throne").style.display="none";
+}
+
+/* scenes */
+const layer = document.getElementById("layer"),
+      title = document.getElementById("t"),
+      sub   = document.getElementById("s"),
+      cd    = document.getElementById("c");
+function showLayer(on){ layer.toggleAttribute("open", !!on); }
+if(scene==="starting"){ showLayer(true); title.textContent="STARTING SOON"; sub.textContent="Grab a snack. We go live in…";
+  const cdStr = q.get("cd"); if(cdStr){ cd.classList.remove("hidden"); let t = Math.max(0, parseInt(cdStr,10)||0);
+    const fmt = n=>String(n).padStart(2,"0"); (function tick(){ const m=Math.floor(t/60), s=t%60; cd.textContent=`${fmt(m)}:${fmt(s)}`; if(t>0){ t--; setTimeout(tick,1000);} })(); }
+}else if(scene==="brb"){ showLayer(true); title.textContent="BE RIGHT BACK"; sub.textContent="Don’t go anywhere!"; }
 </script>
-</body></html>
+</body>
+</html>
