@@ -1,32 +1,34 @@
-<!doctype html><meta charset=utf-8><title>FYS v7</title>
-<style>body{margin:0;color:#fff;background:transparent;font:900 16px system-ui}
-.header{position:fixed;left:20px;right:20px;top:20px;background:rgba(0,0,0,.65);padding:10px 16px;border-radius:18px;outline:3px solid #111;display:flex;gap:16px;align-items:center}
-.brand{font-size:44px} .vp{margin-left:auto;display:flex;gap:12px}.vp span{font:1000 56px system-ui}
-.scene{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none}
-.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
-.sub{font:700 48px system-ui;text-shadow:0 3px 8px rgba(0,0,0,.9)} .cd{font:1000 92px system-ui}
-.sidebar{position:fixed;right:20px;top:124px;bottom:200px;width:860px;display:flex;flex-direction:column;gap:20px}
-.card{background:rgba(6,6,6,.78);backdrop-filter:blur(6px);border-radius:20px;outline:3px solid #111;position:relative;box-shadow:0 12px 30px rgba(0,0,0,.45)}
-.card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FunkYouSHiFT Overlay v8</title>
+<style>
+:root{--ink:#070707;--panel:rgba(6,6,6,.78);--glass:rgba(20,20,20,.35)}
+html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+.header{position:fixed;left:20px;right:20px;top:20px;background:rgba(0,0,0,.65);padding:10px 16px;border-radius:18px;outline:3px solid var(--ink);display:flex;gap:16px;align-items:center}
+.brand{font-weight:1000;font-size:44px} .vp{margin-left:auto;display:flex;gap:12px}.vp .count{font-weight:1000;font-size:64px}
+.panel{background:var(--panel);backdrop-filter:blur(6px);border-radius:20px;outline:3px solid var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.45)}
 .row{position:fixed;left:20px;right:900px;top:124px;height:84px}
+.sidebar{position:fixed;right:20px;top:124px;bottom:200px;width:860px;display:flex;flex-direction:column;gap:20px}
 .footer{position:fixed;left:20px;right:900px;bottom:20px;height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .ticker{position:fixed;left:20px;right:20px;bottom:200px;height:64px}
-</style>
-<div class=header><div id=b class=brand>FUNKYOUSHIFT</div><div class=vp>Twitch <span id=tw>0</span> YouTube <span id=yt>0</span></div></div>
-<div class=row><div class=card style="height:100%"><iframe id=th src=""></iframe></div></div>
-<div class=sidebar><div class=card style="flex:1"><iframe id=chat></iframe></div></div>
-<div class=footer><div class=card><iframe id=sub></iframe></div><div class=card><iframe id=fol></iframe></div></div>
-<div class=ticker><div class=card><iframe id=don></iframe></div></div>
-<div id=layer class=scene hidden><div style="text-align:center"><div id=t class=title>Starting Soon</div><div id=s class=sub>Grab a snack. We go live in…</div><div id=c class=cd hidden>10:00</div></div></div>
+.card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.scene{position:fixed;inset:0;display:none;place-items:center;pointer-events:none}
+.scene[open]{display:grid}
+.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85);text-align:center}
+.sub{font:700 48px system-ui;text-align:center;text-shadow:0 3px 8px rgba(0,0,0,.9)}
+.cd{font:1000 92px system-ui;text-align:center}
+</style></head>
+<body>
+<div class="header panel"><div id="brand" class="brand">FUNKYOUSHIFT</div><div class="vp">Twitch <span id="tw" class="count">0</span> YouTube <span id="yt" class="count">0</span></div></div>
+<div class="row panel"><iframe id="th" title="Throne"></iframe></div>
+<div class="sidebar"><div class="panel card" style="flex:1;position:relative"><iframe id="chat" title="Chat"></iframe></div></div>
+<div class="footer"><div class="panel card" style="position:relative"><iframe id="sub" title="Sub Goal"></iframe></div><div class="panel card" style="position:relative"><iframe id="fol" title="Follower Goal"></iframe></div></div>
+<div class="ticker panel card" style="position:fixed"><iframe id="don" title="Donation Ticker"></iframe></div>
+<div id="layer" class="scene"><div><div id="t" class="title">Starting Soon</div><div id="s" class="sub">Grab a snack. We go live in…</div><div id="c" class="cd" hidden>10:00</div></div></div>
 <script>
-const q=new URLSearchParams(location.search);
-const scene=(q.get('scene')||'main').toLowerCase(); const widgets=(q.get('widgets')??'1')!=='0';
-document.getElementById('b').textContent=q.get('brand')||'FUNKYOUSHIFT';
-const chat=q.get('chatUrl'),sub=q.get('subUrl'),fol=q.get('followerUrl'),don=q.get('donationUrl');
-if(widgets){ if(chat) chat&&(document.getElementById('chat').src=chat);
-if(sub) document.getElementById('sub').src=sub; if(fol) document.getElementById('fol').src=fol;
-if(don) document.getElementById('don').src=don; document.getElementById('th').src='https://throne.com/featured-item-overlay/twitch:492630829'; }
-else{ ['chat','sub','fol','don'].forEach(id=>{let p=document.getElementById(id).parentElement;p.style.display='none';}); document.querySelector('.row').style.display='none'; }
-const L=document.getElementById('layer'),T=document.getElementById('t'),S=document.getElementById('s'),C=document.getElementById('c');
-if(scene==='starting'){L.hidden=false; if(q.get('cd')){C.hidden=false; let t=parseInt(q.get('cd')); const f=n=>String(n).padStart(2,'0'); (function tick(){const m=Math.floor(t/60),s=t%60;C.textContent=f(m)+':'+f(s); if(t>0){t--; setTimeout(tick,1000);}})();}}
+const q=new URLSearchParams(location.search), scene=(q.get('scene')||'main').toLowerCase();
+const widgets=(q.get('widgets')??'1')!=='0'; document.getElementById('brand').textContent=q.get('brand')||'FUNKYOUSHIFT';
+function set(id,url){ if(url) document.getElementById(id).src=url; }
+if(widgets){ set('chat',q.get('chatUrl')); set('sub',q.get('subUrl')); set('fol',q.get('followerUrl')); set('don',q.get('donationUrl')); document.getElementById('th').src='https://throne.com/featured-item-overlay/twitch:492630829'; }
+else{ ['chat','sub','fol','don'].forEach(id=>{let p=document.getElementById(id).parentElement; p.style.display='none';}); document.querySelector('.row').style.display='none'; }
+if(scene==='starting'){ document.getElementById('layer').setAttribute('open',''); const cd=q.get('cd'); if(cd){ const C=document.getElementById('c'); C.hidden=false; let t=parseInt(cd,10)||0; const f=n=>String(n).padStart(2,'0'); (function tick(){const m=Math.floor(t/60),s=t%60; C.textContent=f(m)+':'+f(s); if(t>0){t--; setTimeout(tick,1000);} })(); } }
 </script>
+</body></html>
