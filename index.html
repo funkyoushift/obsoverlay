@@ -20,15 +20,23 @@
   --pad:24px;
 
   /* layout knobs (URL overrides supported) */
-  --headerTop:24px;   /* move header down to clear your marquee (e.g. &headerTop=100) */
-  --headerH:80px;     /* approx header height for stacking math */
+  --headerTop:24px;   /* move header down to clear your marquee: &headerTop=100 */
+  --headerH:80px;     /* auto-updated by JS to real header height */
   --chatW:900px;      /* &chatW=960 */
-  --spotifyH:64px;    /* &spotifyH=48 */
 
-  /* sizes (you asked for a bigger viewer + taller throne) */
+  /* sizes */
   --viewerH:120px;    /* &viewerH=140 */
   --viewerW:760px;    /* &viewerW=820 */
+  --tickerH:64px;     /* &tickerH=72 */
   --throneH:150px;    /* &throneH=190 */
+
+  /* Spotify “next to camera” dock (absolute position) */
+  --spotifyW:520px;   /* &spotifyW=600 */
+  --spotifyH:96px;    /* &spotifyH=110 */
+  --spotifyX:24px;    /* &spotifyX=40  (px from left) */
+  --spotifyY:calc(100vh - var(--pad) - var(--spotifyH) - 170px - 12px); /* just above footer */
+  /* right stack height = viewer + ticker + gap */
+  --stackH: calc(var(--viewerH) + var(--tickerH) + 16px);
 }
 
 *{box-sizing:border-box}
@@ -43,28 +51,53 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 }
 .brand{font-weight:1000;font-size:44px;white-space:nowrap}
 .header-right{margin-left:auto;display:flex;gap:14px;align-items:center}
-.header-right .viewer{height:var(--viewerH);width:var(--viewerW)}
 
 /* panels */
 .panel{background:var(--panel);backdrop-filter:blur(6px);border-radius:20px;outline:3px solid var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.45)}
 .card{position:relative;overflow:hidden}
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
-/* layout (4K) */
-.spotify{position:absolute;left:var(--pad);right:var(--pad);top:calc(var(--headerTop) + var(--headerH));height:var(--spotifyH);z-index:20}
-.throne{
-  position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad));
-  top:calc(var(--headerTop) + var(--headerH) + var(--spotifyH) + 8px);
-  height:var(--throneH);z-index:20
+/* RIGHT SIDEBAR STACK (viewer on top, ticker below it) */
+.rightstack{
+  position:absolute;right:var(--pad);
+  top:calc(var(--headerTop) + var(--headerH));
+  width:var(--chatW);
+  z-index:24; display:grid; gap:16px;
+  grid-template-rows: var(--viewerH) var(--tickerH);
 }
-/* let Throne content extend if it needs to (no cropping) */
+.rightstack .viewer{height:var(--viewerH); width:100%}
+.rightstack .ticker{height:var(--tickerH); width:100%}
+
+/* chat starts below viewer+ticker stack */
+.sidebar{
+  position:absolute;right:var(--pad);
+  top:calc(var(--headerTop) + var(--headerH) + var(--stackH) + 8px);
+  bottom:200px;width:var(--chatW);z-index:20
+}
+
+/* THRONE row (left), not clipped */
+.throne{
+  position:absolute;left:var(--pad);
+  right:calc(var(--pad) + var(--chatW) + var(--pad));
+  top:calc(var(--headerTop) + var(--headerH) + 8px);
+  height:var(--throneH);z-index:22
+}
 .throne.panel.card{overflow:visible}
 
-.sidebar{position:absolute;right:var(--pad);top:calc(var(--headerTop) + var(--headerH));bottom:200px;width:var(--chatW);z-index:20}
+/* GOALS footer (left) */
 .footer{
-  position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad));bottom:var(--pad);
+  position:absolute;left:var(--pad);
+  right:calc(var(--pad) + var(--chatW) + var(--pad));
+  bottom:var(--pad);
   height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:20
 }
+
+/* SPOTIFY dock – place it next to your camera with X/Y */
+.spotifyDock{
+  position:absolute;left:var(--spotifyX);top:var(--spotifyY);
+  width:var(--spotifyW);height:var(--spotifyH);z-index:26
+}
+.spotifyDock.panel.card{overflow:visible}
 
 /* scene layer */
 .scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:25}
@@ -81,30 +114,33 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
   <!-- header -->
   <div class="header" role="banner" aria-label="Overlay Header">
     <div id="brand" class="brand">FUNKYOUSHIFT</div>
-    <div class="header-right">
-      <div class="viewer panel card" aria-label="Viewer Count container">
-        <iframe id="viewer" title="Viewer Count" aria-label="Viewer Count" loading="eager"
-          referrerpolicy="no-referrer"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-      </div>
+    <div class="header-right"></div>
+  </div>
+
+  <!-- right rail: viewer above tip ticker -->
+  <div class="rightstack" aria-label="Viewer + Donation Ticker">
+    <div class="viewer panel card" aria-label="Viewer Count container">
+      <iframe id="viewer" title="Viewer Count" aria-label="Viewer Count" loading="eager"
+        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
+    <div class="ticker panel card" aria-label="Donation Ticker">
+      <iframe id="don" title="Donation Ticker" aria-label="Donation Ticker" loading="eager"
+        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
     </div>
   </div>
 
-  <!-- rows / columns -->
-  <div class="spotify panel card" aria-label="Now Playing">
-    <iframe id="spotify" title="Now Playing" aria-label="Now Playing" loading="eager"
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-  </div>
-
-  <div class="throne panel card" aria-label="Throne Featured Item">
-    <iframe id="throne" title="Throne" aria-label="Throne Featured Item" loading="eager"
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-  </div>
-
+  <!-- chat -->
   <div class="sidebar panel card" aria-label="Chat">
     <iframe id="chat" title="Chat" aria-label="Chat" loading="eager"
+      referrerpolicy="no-referrer"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+  </div>
+
+  <!-- left column: Throne + Goals -->
+  <div class="throne panel card" aria-label="Throne Featured Item">
+    <iframe id="throne" title="Throne" aria-label="Throne Featured Item" loading="eager"
       referrerpolicy="no-referrer"
       sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
   </div>
@@ -120,6 +156,13 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
         referrerpolicy="no-referrer"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
     </div>
+  </div>
+
+  <!-- SPOTIFY dock (place near your camera) -->
+  <div class="spotifyDock panel card" aria-label="Now Playing">
+    <iframe id="spotify" title="Now Playing" aria-label="Now Playing" loading="eager"
+      referrerpolicy="no-referrer"
+      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
   </div>
 
   <!-- scene layer -->
@@ -141,22 +184,32 @@ const DEFAULTS = {
   chatUrl:     "https://streamlabs.com/widgets/chat-box/v1/7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   throneUrl:   "https://throne.com/featured-item-overlay/twitch:492630829",
   spotifyUrl:  "https://6klabs.com/widget/spotify/a4c711870e8d2354a4f9a212cced3c709f3eda2e7e95fa80cc1504967264c62d",
+  donationUrl: "https://streamlabs.com/widgets/donation-ticker?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   brand:       "FUNKYOUSHIFT"
 };
 
-/* URL params */
+/* URL params -> CSS vars */
 const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
 const scene = (q.get("scene") || "main").toLowerCase();
-
-/* apply brand + size vars (chatW, viewerH/W, throneH, spotifyH, headerTop) */
 document.getElementById("brand").textContent = get("brand");
-const setVar = (k,v) => v && document.documentElement.style.setProperty(k, v.endsWith('px')? v : v+'px');
-['chatW','viewerH','viewerW','throneH','spotifyH','headerTop'].forEach(v => setVar('--'+v, q.get(v) || ''));
+
+const setVar = (k,v) => v && document.documentElement.style.setProperty(k, v.match(/px$|%$|vh$|vw$/)? v : v+'px');
+['chatW','viewerH','viewerW','tickerH','throneH','spotifyW','spotifyH','spotifyX','spotifyY','headerTop'].forEach(v => setVar('--'+v, q.get(v) || ''));
+
+/* measure real header height so stacking is correct */
+const resizeHeaderH = () => {
+  const el = document.querySelector('.header');
+  if (!el) return;
+  const h = Math.ceil(el.getBoundingClientRect().height);
+  document.documentElement.style.setProperty('--headerH', h + 'px');
+};
+resizeHeaderH(); addEventListener('resize', resizeHeaderH);
 
 /* set embeds (hide panel if missing) */
 function setSrc(id, url){
   const el = document.getElementById(id);
+  if(!el){ return; }
   if(!url){ el.closest('.card')?.classList.add('hidden'); el.src = 'about:blank'; return; }
   el.src = url;
 }
@@ -166,6 +219,7 @@ setSrc('fol',     get('followerUrl'));
 setSrc('viewer',  get('viewerUrl'));
 setSrc('throne',  get('throneUrl'));
 setSrc('spotify', get('spotifyUrl'));
+setSrc('don',     get('donationUrl'));
 
 /* scene layer */
 const layer = document.getElementById('layer'),
@@ -190,10 +244,6 @@ if(scene==='starting'){
       if(t>0){ t--; setTimeout(tick, 1000); }
     })();
   }
-}else if(scene==='brb'){
-  showLayer(true);
-  title.textContent = 'BE RIGHT BACK';
-  sub.textContent   = 'Don’t go anywhere!';
 }
 </script>
 </body>
