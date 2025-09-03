@@ -5,51 +5,74 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>FunkYouSHiFT Overlay</title>
 <style>
-:root{--ink:#070707;--panel:rgba(6,6,6,.78);--glass:rgba(20,20,20,.35)}
+:root{
+  --ink:#070707;
+  --panel:rgba(6,6,6,.78);
+  --pad:24px;
+  --chatW:900px; /* change via ?chatW=960 */
+}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+html,body{height:100%;margin:0;background:transparent;color:#fff;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
 .overlay{position:relative;height:100vh;width:100vw}
-.header{position:absolute;left:24px;right:24px;top:24px;background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;outline:3px solid var(--ink);display:flex;gap:16px;align-items:center;z-index:20}
-.brand{font-weight:1000;font-size:44px}
-.vp{margin-left:auto;display:flex;gap:16px;align-items:center}
-.vp .lab{opacity:.9;font-weight:800}
-.vp .num{font-weight:1000;font-size:64px}
-.panel{background:var(--panel);backdrop-filter:blur(6px);border-radius:20px;outline:3px solid var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.45)}
-/* layout (left: content; right: chat column) */
-.throne{position:absolute;left:24px;right:900px;top:120px;height:84px;z-index:10}
-.sidebar{position:absolute;right:24px;top:120px;bottom:200px;width:876px;z-index:10}
-.footer{position:absolute;left:24px;right:900px;bottom:24px;height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:10}
-.ticker{position:absolute;left:24px;right:24px;bottom:210px;height:64px;z-index:10}
+
+/* HEADER */
+.header{position:absolute;left:var(--pad);right:var(--pad);top:var(--pad);
+  background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;
+  outline:3px solid var(--ink);display:flex;gap:16px;align-items:center;z-index:30}
+.brand{font-weight:1000;font-size:44px;white-space:nowrap}
+.header-right{margin-left:auto;display:flex;gap:14px;align-items:center}
+.header-right .viewer{height:56px;width:min(520px,32vw)}
+
+/* PANELS */
+.panel{background:var(--panel);backdrop-filter:blur(6px);
+  border-radius:20px;outline:3px solid var(--ink);
+  box-shadow:0 12px 30px rgba(0,0,0,.45)}
 .card{position:relative;overflow:hidden}
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-/* scene overlays (e.g., starting soon) */
-.scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:15}
+
+/* LAYOUT (3840×2160-friendly) */
+.spotify{position:absolute;left:var(--pad);right:var(--pad);top:118px;height:64px;z-index:20}
+.throne {position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad)); top:186px;height:84px;z-index:20}
+.sidebar{position:absolute;right:var(--pad);top:118px;bottom:200px;width:var(--chatW);z-index:20}
+.footer {position:absolute;left:var(--pad);right:calc(var(--pad) + var(--chatW) + var(--pad));bottom:var(--pad);
+         height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:20}
+
+/* SCENE LAYER (Starting/BRB) */
+.scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:25}
 .scene[open]{display:grid}
 .scene .box{padding:28px 40px;border-radius:22px;background:rgba(0,0,0,.28);outline:3px solid var(--ink)}
-.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-align:center;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
+.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-align:center;
+  text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
 .sub{font:700 48px system-ui;text-align:center;text-shadow:0 3px 8px rgba(0,0,0,.9)}
 .cd{font:1000 92px system-ui;text-align:center;margin-top:8px}
+
+/* UTIL */
 .hidden{display:none}
 </style>
 </head>
 <body>
 <div class="overlay">
-  <div class="header panel">
+  <!-- HEADER -->
+  <div class="header">
     <div id="brand" class="brand">FUNKYOUSHIFT</div>
-    <div class="vp">
-      <span class="lab">Twitch</span><span id="tw" class="num">0</span>
-      <span class="lab">YouTube</span><span id="yt" class="num">0</span>
+    <div class="header-right">
+      <div class="viewer panel card">
+        <iframe id="viewer" title="Viewer Count" allowtransparency="true"></iframe>
+      </div>
     </div>
   </div>
 
-  <div class="throne panel card"><iframe id="th" title="Throne"></iframe></div>
-  <div class="sidebar panel card"><iframe id="chat" title="Chat"></iframe></div>
+  <!-- ROWS / COLUMNS -->
+  <div class="spotify panel card"><iframe id="spotify" title="Now Playing" allowtransparency="true"></iframe></div>
+  <div class="throne  panel card"><iframe id="throne"  title="Throne"       allowtransparency="true"></iframe></div>
+  <div class="sidebar panel card"><iframe id="chat"    title="Chat"         allowtransparency="true"></iframe></div>
   <div class="footer">
-    <div class="panel card"><iframe id="sub" title="Sub Goal"></iframe></div>
-    <div class="panel card"><iframe id="fol" title="Follower Goal"></iframe></div>
+    <div class="panel card"><iframe id="sub" title="Sub Goal"     allowtransparency="true"></iframe></div>
+    <div class="panel card"><iframe id="fol" title="Follower Goal" allowtransparency="true"></iframe></div>
   </div>
-  <div class="ticker panel card"><iframe id="don" title="Donation Ticker"></iframe></div>
 
+  <!-- SCENE LAYER -->
   <div id="layer" class="scene">
     <div class="box">
       <div id="t" class="title">STARTING SOON</div>
@@ -60,51 +83,78 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 </div>
 
 <script>
-/* --- defaults (your URLs) --- */
+/* ===== DEFAULTS (YOUR EMBEDS) ===== */
 const DEFAULTS = {
-  chatUrl: "https://streamlabs.com/widgets/chat-box/v1/7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
-  subUrl: "https://streamlabs.com/widgets/sub-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  subUrl:      "https://streamlabs.com/widgets/sub-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   followerUrl: "https://streamlabs.com/widgets/follower-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
-  donationUrl: "https://streamlabs.com/widgets/donation-ticker?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
-  throneUrl: "https://throne.com/featured-item-overlay/twitch:492630829",
-  brand: "FUNKYOUSHIFT"
+  viewerUrl:   "https://streamlabs.com/widgets/viewer-count?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  chatUrl:     "https://streamlabs.com/widgets/chat-box/v1/7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
+  throneUrl:   "https://throne.com/featured-item-overlay/twitch:492630829",
+  spotifyUrl:  "https://6klabs.com/widget/spotify/a4c711870e8d2354a4f9a212cced3c709f3eda2e7e95fa80cc1504967264c62d",
+  brand:       "FUNKYOUSHIFT"
 };
-/* --- params override defaults --- */
+
+/* ===== OPTIONAL URL PARAMS =====
+   ?scene=starting|brb|main (default main)
+   ?cd=600                 (countdown seconds for starting)
+   ?brand=TEXT
+   ?chatW=960              (chat sidebar width in px)
+   (You can also override any widget: &chatUrl=..., &subUrl=..., etc.)
+================================== */
+
 const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
-const widgets = (q.get("widgets") ?? "1") !== "0";
 const scene = (q.get("scene") || "main").toLowerCase();
-const brand = q.get("brand") || DEFAULTS.brand;
+
+const brand = get("brand");
 document.getElementById("brand").textContent = brand;
 
-/* viewer counts if provided (optional) */
-const twQ = parseInt(q.get("tw")||"",10), ytQ = parseInt(q.get("ytv")||"",10);
-if(!isNaN(twQ)) document.getElementById("tw").textContent = twQ;
-if(!isNaN(ytQ)) document.getElementById("yt").textContent = ytQ;
-
-/* embeds */
-function setSrc(id, url){ if(!url){document.getElementById(id).closest(".card").style.display="none";return;} document.getElementById(id).src = url; }
-if(widgets){
-  setSrc("chat", get("chatUrl"));
-  setSrc("sub", get("subUrl"));
-  setSrc("fol", get("followerUrl"));
-  setSrc("don", get("donationUrl"));
-  setSrc("th",  get("throneUrl"));
-}else{
-  ["chat","sub","fol","don"].forEach(id=>document.getElementById(id).closest(".card").style.display="none");
-  document.querySelector(".throne").style.display="none";
+const chatW = q.get("chatW");
+if (chatW) {
+  document.documentElement.style.setProperty("--chatW", chatW.endsWith("px") ? chatW : chatW + "px");
 }
 
-/* scenes */
+/* set embed URLs (hide panel if url missing) */
+function setSrc(id, url){
+  const el = document.getElementById(id);
+  if(!url){ el.closest(".card")?.classList.add("hidden"); el.src="about:blank"; return; }
+  el.src = url;
+}
+setSrc("chat",    get("chatUrl"));
+setSrc("sub",     get("subUrl"));
+setSrc("fol",     get("followerUrl"));
+setSrc("viewer",  get("viewerUrl"));
+setSrc("throne",  get("throneUrl"));
+setSrc("spotify", get("spotifyUrl"));
+
+/* scene layer (Starting/BRB) */
 const layer = document.getElementById("layer"),
       title = document.getElementById("t"),
       sub   = document.getElementById("s"),
       cd    = document.getElementById("c");
+
 function showLayer(on){ layer.toggleAttribute("open", !!on); }
-if(scene==="starting"){ showLayer(true); title.textContent="STARTING SOON"; sub.textContent="Grab a snack. We go live in…";
-  const cdStr = q.get("cd"); if(cdStr){ cd.classList.remove("hidden"); let t = Math.max(0, parseInt(cdStr,10)||0);
-    const fmt = n=>String(n).padStart(2,"0"); (function tick(){ const m=Math.floor(t/60), s=t%60; cd.textContent=`${fmt(m)}:${fmt(s)}`; if(t>0){ t--; setTimeout(tick,1000);} })(); }
-}else if(scene==="brb"){ showLayer(true); title.textContent="BE RIGHT BACK"; sub.textContent="Don’t go anywhere!"; }
+
+if(scene==="starting"){
+  showLayer(true);
+  title.textContent = "STARTING SOON";
+  sub.textContent   = "Grab a snack. We go live in…";
+  const cdStr = q.get("cd");
+  if(cdStr){
+    cd.classList.remove("hidden");
+    let t = Math.max(0, parseInt(cdStr,10) || 0);
+    const fmt = n => String(n).padStart(2,"0");
+    (function tick(){
+      const m = Math.floor(t/60), s = t%60;
+      cd.textContent = `${fmt(m)}:${fmt(s)}`;
+      if(t>0){ t--; setTimeout(tick, 1000); }
+    })();
+  }
+}else if(scene==="brb"){
+  showLayer(true);
+  title.textContent = "BE RIGHT BACK";
+  sub.textContent   = "Don’t go anywhere!";
+}
 </script>
 </body>
 </html>
