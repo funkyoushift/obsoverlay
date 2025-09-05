@@ -19,7 +19,7 @@
   /* layout knobs (URL overrides supported) */
   --headerTop:24px;   /* &headerTop=100 to clear marquee */
   --headerH:80px;     /* auto-measured by JS */
-  --chatW:900px;      /* &chatW=960 */
+  --chatW:900px;      /* now: RIGHT column width (ticker) */
 
   /* remaining widgets */
   --tickerH:72px;     /* &tickerH=80 */
@@ -45,19 +45,12 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 .card{position:relative;overflow:hidden}
 .card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 
-/* RIGHT: donation/tip ticker (no viewer here anymore) */
+/* RIGHT: donation/tip ticker */
 .tickerOnly{
   position:absolute;right:var(--pad);
   top:calc(var(--headerTop) + var(--headerH));
   width:var(--chatW);height:var(--tickerH);
   z-index:40;
-}
-
-/* chat starts beneath the ticker */
-.sidebar{
-  position:absolute;right:var(--pad);
-  top:calc(var(--headerTop) + var(--headerH) + var(--tickerH) + 8px);
-  bottom:200px;width:var(--chatW);z-index:20
 }
 
 /* LEFT: Throne row (not clipped) */
@@ -106,13 +99,6 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
       sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
   </div>
 
-  <!-- RIGHT: chat -->
-  <div class="sidebar panel card" aria-label="Chat">
-    <iframe id="chat" title="Chat" aria-label="Chat" loading="eager"
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-  </div>
-
   <!-- LEFT: Throne + Goals -->
   <div class="throne panel card" aria-label="Throne Featured Item">
     <iframe id="throne" title="Throne" aria-label="Throne Featured Item" loading="eager"
@@ -144,11 +130,10 @@ html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:sys
 </div>
 
 <script>
-/* widget defaults (Spotify & Viewer removed) */
+/* widget defaults (Spotify & Viewer & Chat removed) */
 const DEFAULTS = {
   subUrl:      "https://streamlabs.com/widgets/sub-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   followerUrl: "https://streamlabs.com/widgets/follower-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
-  chatUrl:     "https://streamlabs.com/widgets/chat-box/v1/7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   throneUrl:   "https://throne.com/featured-item-overlay/twitch:492630829",
   donationUrl: "https://streamlabs.com/widgets/donation-ticker?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   brand:       "FUNKYOUSHIFT"
@@ -184,7 +169,6 @@ function setSrc(id, url){
   if(!url){ el.closest('.card')?.classList.add('hidden'); el.src = 'about:blank'; return; }
   el.src = withBust(url);
 }
-setSrc('chat',    get('chatUrl'));
 setSrc('sub',     get('subUrl'));
 setSrc('fol',     get('followerUrl'));
 setSrc('throne',  get('throneUrl'));
