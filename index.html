@@ -11,150 +11,56 @@
 <link rel="dns-prefetch" href="https://throne.com">
 
 <style>
-:root{
-  --ink:#070707;
-  --panel:rgba(6,6,6,.78);
-  --pad:24px;
-
-  /* layout knobs (URL overrides supported) */
-  --headerTop:24px;   /* &headerTop=100 to clear marquee */
-  --headerH:80px;     /* auto-measured by JS */
-  --chatW:900px;      /* now: RIGHT column width (ticker) */
-
-  /* remaining widgets */
-  --tickerH:72px;     /* &tickerH=80 */
-  --throneH:180px;    /* &throneH=190 */
-}
-
-/* base */
+:root{--orange:#ff5a1f;--orange-hot:#ff7a24;--violet:#a46bff;--teal:#31e6d3;--panel:rgba(10,12,17,.88);--line:rgba(255,255,255,.2);--safe:2.08vw;--headerTop:2.08vw}
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:transparent;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
-.overlay{position:relative;height:100vh;width:100vw}
-
-/* header (make transparent by uncommenting block at bottom if desired) */
-.header{
-  position:absolute;left:var(--pad);right:var(--pad);top:var(--headerTop);
-  background:rgba(0,0,0,.65);padding:12px 20px;border-radius:18px;outline:3px solid var(--ink);
-  display:flex;gap:16px;align-items:center;z-index:30
-}
-.brand{font-weight:1000;font-size:44px;white-space:nowrap}
-.header-right{margin-left:auto;display:flex;gap:14px;align-items:center}
-
-/* panels */
-.panel{background:var(--panel);backdrop-filter:blur(6px);border-radius:20px;outline:3px solid var(--ink);box-shadow:0 12px 30px rgba(0,0,0,.45)}
-.card{position:relative;overflow:hidden}
-.card>iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-
-/* RIGHT: donation/tip ticker */
-.tickerOnly{
-  position:absolute;right:var(--pad);
-  top:calc(var(--headerTop) + var(--headerH));
-  width:var(--chatW);height:var(--tickerH);
-  z-index:40;
-}
-
-/* LEFT: Throne row (not clipped) */
-.throne{
-  position:absolute;left:var(--pad);
-  right:calc(var(--pad) + var(--chatW) + var(--pad));
-  top:calc(var(--headerTop) + var(--headerH) + 8px);
-  height:var(--throneH);z-index:22
-}
-.throne.panel.card{overflow:visible}
-
-/* GOALS footer (left) */
-.footer{
-  position:absolute;left:var(--pad);
-  right:calc(var(--pad) + var(--chatW) + var(--pad));
-  bottom:var(--pad);
-  height:170px;display:grid;grid-template-columns:1fr 1fr;gap:20px;z-index:20
-}
-
-/* scene layer */
-.scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:25}
-.scene[open]{display:grid}
-.scene .box{padding:28px 40px;border-radius:22px;background:rgba(0,0,0,.28);outline:3px solid var(--ink)}
-.title{font:1000 180px/1 system-ui;text-transform:uppercase;text-align:center;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
-.sub{font:700 48px system-ui;text-align:center;text-shadow:0 3px 8px rgba(0,0,0,.9)}
-.cd{font:1000 92px system-ui;text-align:center;margin-top:8px}
-.hidden{display:none}
-
-/* (optional) make header fully transparent
-.header{ background:transparent !important; outline:none !important; box-shadow:none !important; padding:0 !important }
-*/
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:transparent;color:#f7f7f4;font-family:"Arial Narrow","Segoe UI",sans-serif}
+.overlay{position:relative;width:100vw;height:100vh;isolation:isolate}
+.overlay:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 7px,rgba(255,255,255,.012) 8px);z-index:90}
+.panel{position:absolute;overflow:hidden;background:linear-gradient(135deg,rgba(27,30,38,.94),var(--panel));border:1px solid var(--line);box-shadow:0 18px 54px rgba(0,0,0,.42),inset 0 0 0 1px rgba(255,255,255,.035);clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px))}
+.panel:before{content:"";position:absolute;inset:0 auto 0 0;width:.31vw;background:linear-gradient(var(--orange-hot),var(--orange));box-shadow:0 0 22px rgba(255,90,31,.48);z-index:3}
+.panel.violet:before{background:var(--violet);box-shadow:0 0 22px rgba(164,107,255,.48)}
+.panel>iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent}
+.brand-lockup{top:var(--headerTop);left:var(--safe);width:16vw;height:3.4vw;display:flex;align-items:center;padding:0 1.7vw;z-index:30}
+.brand{font-size:1.7vw;font-weight:1000;line-height:1;letter-spacing:-.055em;text-transform:uppercase;white-space:nowrap}.brand .shift{color:var(--orange)}
+.slash{width:.25vw;height:54%;margin-left:1.1vw;background:var(--teal);transform:skew(-15deg);box-shadow:0 0 22px rgba(49,230,211,.4)}
+.throne{top:calc(var(--headerTop) + 4.2vw);left:var(--safe);width:21vw;height:9vw;z-index:20}
+.status{right:var(--safe);top:var(--headerTop);width:18vw;height:3.4vw;display:flex;align-items:center;justify-content:center;padding:0 1vw;font-size:.72vw;font-weight:900;letter-spacing:.15em;text-transform:uppercase;z-index:30}
+.scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:25}.scene[open]{display:grid}
+.scene-box{padding:1.5vw 2vw;background:rgba(0,0,0,.34);border:1px solid var(--line);clip-path:polygon(0 0,calc(100% - 28px) 0,100% 28px,100% 100%,28px 100%,0 calc(100% - 28px));text-align:center}
+.title{font-size:4.7vw;font-weight:1000;line-height:1;text-transform:uppercase;text-shadow:0 6px 0 #000,0 16px 42px rgba(0,0,0,.85)}
+.sub{margin-top:.5vw;font-size:1.25vw;font-weight:700}.cd{margin-top:.4vw;font-size:2.4vw;font-weight:1000;color:var(--orange)}
+.hidden{display:none!important}
+body.preview{background:#07090d}body.preview .overlay{background:radial-gradient(circle at 50% 52%,rgba(255,90,31,.08),transparent 38%),linear-gradient(135deg,#20232a 0%,#11141a 52%,#252018 100%)}
 </style>
 </head>
 <body>
-<div class="overlay">
-  <!-- header -->
-  <div class="header" role="banner" aria-label="Overlay Header">
-    <div id="brand" class="brand">FUNKYOUSHIFT</div>
-    <div class="header-right"></div>
-  </div>
-
-  <!-- RIGHT: donation/tip ticker only -->
-  <div class="tickerOnly panel card" aria-label="Donation Ticker">
-    <iframe id="don" title="Donation Ticker" aria-label="Donation Ticker" loading="eager"
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-  </div>
-
-  <!-- LEFT: Throne + Goals -->
-  <div class="throne panel card" aria-label="Throne Featured Item">
-    <iframe id="throne" title="Throne" aria-label="Throne Featured Item" loading="eager"
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-  </div>
-
-  <div class="footer" aria-label="Goals">
-    <div class="panel card" aria-label="Sub Goal">
-      <iframe id="sub" title="Sub Goal" aria-label="Sub Goal" loading="eager"
-        referrerpolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-    </div>
-    <div class="panel card" aria-label="Follower Goal">
-      <iframe id="fol" title="Follower Goal" aria-label="Follower Goal" loading="eager"
-        referrerpolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-    </div>
-  </div>
-
-  <!-- scene layer -->
-  <div id="layer" class="scene" aria-hidden="true">
-    <div class="box">
-      <div id="t" class="title">STARTING SOON</div>
-      <div id="s" class="sub">Grab a snack. We go live in…</div>
-      <div id="c" class="cd hidden">10:00</div>
-    </div>
-  </div>
-</div>
+<main class="overlay" aria-label="FunkYouSHiFT stream overlay">
+  <section class="brand-lockup panel" aria-label="Channel branding"><div id="brand" class="brand">FUNKYOU<span class="shift">SHIFT</span></div><span class="slash" aria-hidden="true"></span></section>
+  <section class="status panel" aria-label="Stream status"><span id="status">WELCOME TO THE SHIFT</span></section>
+  <section class="throne panel" aria-label="Throne featured item"><iframe id="throne" title="Throne Featured Item" loading="eager" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe></section>
+  <section id="layer" class="scene" aria-hidden="true"><div class="scene-box"><div id="t" class="title">STARTING SOON</div><div id="s" class="sub">Grab a snack. We go live in…</div><div id="c" class="cd hidden">10:00</div></div></section>
+</main>
 
 <script>
-/* widget defaults (Spotify & Viewer & Chat removed) */
+/* Dynamic Streamlabs widgets intentionally remain direct OBS sources because
+   Streamlabs blocks them when nested on a third-party site. */
 const DEFAULTS = {
-  subUrl:      "https://streamlabs.com/widgets/sub-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
-  followerUrl: "https://streamlabs.com/widgets/follower-goal?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
   throneUrl:   "https://throne.com/featured-item-overlay/twitch:492630829",
-  donationUrl: "https://streamlabs.com/widgets/donation-ticker?token=7B7657C5393C19BA008816799794608699B0A8EB5AB5FC821A45C79FAD70D3F30FC56EE70771A6970EFF29A897CEF86B54FD29F8EE831EB045DC9FC3BA62AFCDA2F397758D62664EDA89F83AB418470EB8014E2A08D13FF8128DC7F8C3E7F809D8B44A555DD2EF7C601BC17F0DA2208E3E4E99481EAADED7E2FF528FED",
-  brand:       "FUNKYOUSHIFT"
+  brand:       "FUNKYOUSHIFT",
+  status:      "WELCOME TO THE SHIFT"
 };
 
-/* URL params -> CSS vars */
 const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
-document.getElementById("brand").textContent = get("brand");
+const brandText = get('brand');
+const brandEl = document.getElementById('brand');
+const shiftAt = brandText.toUpperCase().lastIndexOf('SHIFT');
+brandEl.textContent = shiftAt > -1 ? brandText.slice(0, shiftAt) : brandText;
+if(shiftAt > -1){ const span=document.createElement('span'); span.className='shift'; span.textContent=brandText.slice(shiftAt); brandEl.append(span); }
+document.getElementById('status').textContent = get('status');
 
-const setVar = (k,v) => v && document.documentElement.style.setProperty(k, /px$|%$|vh$|vw$/.test(v)? v : v+'px');
-['chatW','tickerH','throneH','headerTop'].forEach(v => setVar('--'+v, q.get(v) || ''));
-
-/* measure real header height so stacking is correct */
-const measureHeader = () => {
-  const el = document.querySelector('.header');
-  if (!el) return;
-  const h = Math.ceil(el.getBoundingClientRect().height);
-  document.documentElement.style.setProperty('--headerH', h + 'px');
-};
-measureHeader(); addEventListener('resize', measureHeader);
+const headerTop = q.get('headerTop');
+if(headerTop) document.documentElement.style.setProperty('--headerTop', /^\d+(\.\d+)?$/.test(headerTop) ? `${Number(headerTop)/38.4}vw` : headerTop);
 
 /* small cache-buster so OBS doesn't keep stale widgets */
 const withBust = (url) => {
@@ -166,15 +72,14 @@ const withBust = (url) => {
 function setSrc(id, url){
   const el = document.getElementById(id);
   if(!el){ return; }
-  if(!url){ el.closest('.card')?.classList.add('hidden'); el.src = 'about:blank'; return; }
+  if(!url){ el.closest('.panel')?.classList.add('hidden'); el.src = 'about:blank'; return; }
   el.src = withBust(url);
 }
-setSrc('sub',     get('subUrl'));
-setSrc('fol',     get('followerUrl'));
 setSrc('throne',  get('throneUrl'));
-setSrc('don',     get('donationUrl'));
+const toggle = (selector,param,defaultOn=true) => document.querySelector(selector)?.classList.toggle('hidden', (q.get(param) ?? (defaultOn?'1':'0')) === '0');
+toggle('.throne','showThrone'); toggle('.status','showStatus');
+document.body.classList.toggle('preview', q.get('preview') === '1');
 
-/* optional: starting scene (use ?scene=starting&cd=600) */
 const layer = document.getElementById('layer'),
       title = document.getElementById('t'),
       sub   = document.getElementById('s'),
@@ -198,6 +103,12 @@ if(scene==='starting'){
     })();
   }
 }
+if(scene==='ending'){
+  showLayer(true);
+  title.textContent = 'THANKS FOR WATCHING';
+  sub.textContent = 'Stay weird. Stay kind. See you next stream.';
+}
 </script>
 </body>
 </html>
+
