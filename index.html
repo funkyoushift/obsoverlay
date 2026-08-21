@@ -23,6 +23,13 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:transparent
 .brand-lockup{top:var(--headerTop);left:var(--safe);width:16vw;height:3.4vw;display:flex;align-items:center;padding:0 1.7vw;z-index:30}
 .brand{font-size:1.7vw;font-weight:1000;line-height:1;letter-spacing:-.055em;text-transform:uppercase;white-space:nowrap}.brand .shift{color:var(--orange)}
 .slash{width:.25vw;height:54%;margin-left:1.1vw;background:var(--teal);transform:skew(-15deg);box-shadow:0 0 22px rgba(49,230,211,.4)}
+.ticker{left:19vw;right:22vw;top:var(--headerTop);height:3.4vw;display:flex;align-items:center;z-index:29}
+.ticker:before{background:var(--teal);box-shadow:0 0 22px rgba(49,230,211,.4)}
+.ticker-window{position:absolute;inset:0;overflow:hidden;display:flex;align-items:center}
+.ticker-track{display:flex;min-width:max-content;gap:5vw;padding-left:2vw;font-size:.76vw;font-weight:900;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;animation:ticker-slide 28s linear infinite}
+.ticker-track span:after{content:" // ";padding-left:5vw;color:var(--orange)}
+.ticker-time{position:absolute;right:.7vw;top:50%;transform:translateY(-50%);padding:.35vw .65vw;background:#0a0c11;color:var(--orange);font-size:1vw;font-weight:1000;letter-spacing:.08em;z-index:4}
+@keyframes ticker-slide{to{transform:translateX(-50%)}}
 .throne{top:calc(var(--headerTop) + 4.2vw);left:var(--safe);width:21vw;height:9vw;z-index:20}
 .status{right:var(--safe);top:var(--headerTop);width:18vw;height:3.4vw;display:flex;align-items:center;justify-content:center;padding:0 1vw;font-size:.72vw;font-weight:900;letter-spacing:.15em;text-transform:uppercase;z-index:30}
 .scene{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:25}.scene[open]{display:grid}
@@ -31,11 +38,13 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:transparent
 .sub{margin-top:.5vw;font-size:1.25vw;font-weight:700}.cd{margin-top:.4vw;font-size:2.4vw;font-weight:1000;color:var(--orange)}
 .hidden{display:none!important}
 body.preview{background:#07090d}body.preview .overlay{background:radial-gradient(circle at 50% 52%,rgba(255,90,31,.08),transparent 38%),linear-gradient(135deg,#20232a 0%,#11141a 52%,#252018 100%)}
+@media(prefers-reduced-motion:reduce){.ticker-track{animation:none}}
 </style>
 </head>
 <body>
 <main class="overlay" aria-label="FunkYouSHiFT stream overlay">
   <section class="brand-lockup panel" aria-label="Channel branding"><div id="brand" class="brand">FUNKYOU<span class="shift">SHIFT</span></div><span class="slash" aria-hidden="true"></span></section>
+  <section class="ticker panel" aria-label="Stream message"><div class="ticker-window"><div id="tickerTrack" class="ticker-track"></div></div><span id="tickerTime" class="ticker-time hidden"></span></section>
   <section class="status panel" aria-label="Stream status"><span id="status">WELCOME TO THE SHIFT</span></section>
   <section class="throne panel" aria-label="Throne featured item"><iframe id="throne" title="Throne Featured Item" loading="eager" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe></section>
   <section id="layer" class="scene" aria-hidden="true"><div class="scene-box"><div id="t" class="title">STARTING SOON</div><div id="s" class="sub">Grab a snack. We go live in…</div><div id="c" class="cd hidden">10:00</div></div></section>
@@ -47,17 +56,27 @@ body.preview{background:#07090d}body.preview .overlay{background:radial-gradient
 const DEFAULTS = {
   throneUrl:   "https://throne.com/featured-item-overlay/twitch:492630829",
   brand:       "FUNKYOUSHIFT",
-  status:      "WELCOME TO THE SHIFT"
+  status:      "LIVE // SHIFTING MAYHEM",
+  ticker:      "WELCOME! ADD FUNKYOUSHIFT ON SHIFT AND JOIN THE GAME FOR XP AND LEGENDARY DROPS"
 };
 
 const q = new URLSearchParams(location.search);
 const get = (k) => q.get(k) || DEFAULTS[k] || "";
+const scene = (q.get("scene") || "main").toLowerCase();
 const brandText = get('brand');
 const brandEl = document.getElementById('brand');
 const shiftAt = brandText.toUpperCase().lastIndexOf('SHIFT');
 brandEl.textContent = shiftAt > -1 ? brandText.slice(0, shiftAt) : brandText;
 if(shiftAt > -1){ const span=document.createElement('span'); span.className='shift'; span.textContent=brandText.slice(shiftAt); brandEl.append(span); }
 document.getElementById('status').textContent = get('status');
+const sceneTicker = {
+  starting: 'STREAM STARTING SOON • GRAB A SNACK AND GET COMFORTABLE',
+  podcast: 'PODCAST MODE • LIVE CONVERSATION • CHAT IS OPEN',
+  ending: 'THANKS FOR WATCHING • STAY WEIRD • STAY KIND'
+};
+const tickerText = q.get('ticker') || sceneTicker[scene] || DEFAULTS.ticker;
+const tickerTrack = document.getElementById('tickerTrack');
+for(let i=0;i<2;i++){ const span=document.createElement('span'); span.textContent=tickerText; tickerTrack.append(span); }
 
 const headerTop = q.get('headerTop');
 if(headerTop) document.documentElement.style.setProperty('--headerTop', /^\d+(\.\d+)?$/.test(headerTop) ? `${Number(headerTop)/38.4}vw` : headerTop);
@@ -78,27 +97,26 @@ function setSrc(id, url){
 setSrc('throne',  get('throneUrl'));
 const toggle = (selector,param,defaultOn=true) => document.querySelector(selector)?.classList.toggle('hidden', (q.get(param) ?? (defaultOn?'1':'0')) === '0');
 toggle('.throne','showThrone'); toggle('.status','showStatus');
+if(q.get('showStatus') === '0') document.querySelector('.ticker').style.right = 'var(--safe)';
 document.body.classList.toggle('preview', q.get('preview') === '1');
 
 const layer = document.getElementById('layer'),
       title = document.getElementById('t'),
       sub   = document.getElementById('s'),
-      cd    = document.getElementById('c');
-const scene = (q.get("scene") || "main").toLowerCase();
+      cd    = document.getElementById('c'),
+      tickerTime = document.getElementById('tickerTime');
 
 function showLayer(on){ layer.toggleAttribute('open', !!on); layer.setAttribute('aria-hidden', on? 'false':'true'); }
 
 if(scene==='starting'){
-  showLayer(true);
-  title.textContent = 'STARTING SOON';
-  sub.textContent   = 'Grab a snack. We go live in…';
+  showLayer(false);
   const cdStr = q.get('cd');
   if(cdStr){
-    cd.classList.remove('hidden');
+    tickerTime.classList.remove('hidden');
     let t = Math.max(0, parseInt(cdStr,10) || 0);
     const fmt = n => String(n).padStart(2,'0');
     (function tick(){ const m=Math.floor(t/60), s=t%60;
-      cd.textContent = `${fmt(m)}:${fmt(s)}`;
+      tickerTime.textContent = `${fmt(m)}:${fmt(s)}`;
       if(t>0){ t--; setTimeout(tick,1000); }
     })();
   }
